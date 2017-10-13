@@ -28,9 +28,23 @@ public class BlockChainTest {
         final Block checkBlockNotInChain = new Block("bar", parentHash, new TreeSet<>(), null);
 
         /* Act & Assert */
-        assertTrue(impl.addBlock(addBlock));
+        impl.addBlock(addBlock);
         assertTrue(impl.containsBlock(checkBlock));
         assertFalse(impl.containsBlock(checkBlockNotInChain));
+    }
+
+    @Test
+    public void testThatChainHasCorrectHead() {
+         /* Arrange */
+        final String hash = "foo";
+        final String parentHash = ZERO.getHash();
+        final Block addBlock = new Block(hash, parentHash, new TreeSet<>(), null);
+        final Block addBlockNotInChain = new Block("bar", parentHash, new TreeSet<>(), null);
+        /* Act & Assert */
+        impl.addBlock(addBlock);
+        impl.addBlock(addBlockNotInChain);
+
+        assertEquals(addBlock, impl.getEndBlock().getData());
     }
 
     @Test

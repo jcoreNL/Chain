@@ -6,7 +6,7 @@ import com.google.common.base.MoreObjects;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class Block {
+public final class Block {
     public static final Block ZERO;
 
     static {

@@ -21,7 +21,7 @@ public class BlockChain {
         maxDepth = 0;
     }
 
-    public boolean addBlock(final Block block) {
+    public void addBlock(final Block block) {
         if(blocks.containsKey(block.getParentHash())) {
             final TreeNode<Block> parentBlock = blocks.get(block.getParentHash());
             final TreeNode<Block> newNode = parentBlock.addChild(block);
@@ -30,9 +30,7 @@ public class BlockChain {
                 endBlock = newNode;
             }
             blocks.put(block.getHash(), newNode);
-            return true;
         }
-        return false;
     }
 
     public boolean containsBlock(final Block b) {

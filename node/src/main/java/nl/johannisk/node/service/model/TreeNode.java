@@ -21,10 +21,6 @@ public class TreeNode<T> {
         return newChild;
     }
 
-    public List<TreeNode<T>> getChildren() {
-        return children;
-    }
-
     public TreeNode<T> getParent() {
         return parent;
     }

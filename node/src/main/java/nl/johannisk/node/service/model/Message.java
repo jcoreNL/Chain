@@ -3,7 +3,7 @@ package nl.johannisk.node.service.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 
-public class Message implements Comparable {
+public final class Message implements Comparable {
     private final int index;
     private final String text;
 
