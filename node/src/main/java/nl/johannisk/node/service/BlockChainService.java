@@ -54,7 +54,7 @@ public class BlockChainService {
     public void addMessage(final Message m) {
         if (!handledMessages.contains(m) && !unhandledMessages.contains(m)) {
             unhandledMessages.add(m);
-            if (unhandledMessages.size() >= 5 && blockCreatorService.state == BlockCreatorService.State.READY) {
+            if (unhandledMessages.size() >= 5 && blockCreatorService.getState() == BlockCreatorService.State.READY) {
                 final Set<Message> blockContent = pickMessagesForPotentialBlock();
                 blockCreatorService.createBlock(chain.getEndBlock().getData(), blockContent, this::addCreatedBlock);
             }
@@ -68,11 +68,11 @@ public class BlockChainService {
             final String lastBlockHash = chain.getEndBlock().getData().getHash();
             chain.addBlock(block);
             if (!chain.getEndBlock().getData().getHash().equals(lastBlockHash)) {
-                if (blockCreatorService.state == BlockCreatorService.State.RUNNING) {
-                    blockCreatorService.state = BlockCreatorService.State.CANCELLED;
+                if (blockCreatorService.getState() == BlockCreatorService.State.RUNNING) {
+                    blockCreatorService.cancelRun();
                 }
                 resetMessagesAccordingToChain();
-                if (unhandledMessages.size() >= 5 && blockCreatorService.state == BlockCreatorService.State.READY) {
+                if (unhandledMessages.size() >= 5 && blockCreatorService.getState() == BlockCreatorService.State.READY) {
                     final Set<Message> blockContent = pickMessagesForPotentialBlock();
                     blockCreatorService.createBlock(chain.getEndBlock().getData(), blockContent, this::addCreatedBlock);
                 }

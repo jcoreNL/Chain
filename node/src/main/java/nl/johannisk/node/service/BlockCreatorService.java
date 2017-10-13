@@ -47,4 +47,13 @@ public class BlockCreatorService {
         }
         state = State.READY;
     }
+
+    public State getState() {
+        return state;
+    }
+
+    public void cancelRun() {
+        this.state = State.CANCELLED;
+    }
+
 }
