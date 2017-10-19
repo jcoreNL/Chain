@@ -1,17 +1,21 @@
 package nl.johannisk.node.service;
 
+import io.reactivex.Maybe;
 import nl.johannisk.node.hasher.JChainHasher;
 import nl.johannisk.node.service.model.Block;
 import nl.johannisk.node.service.model.Message;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
 import java.util.Set;
-import java.util.function.Consumer;
+
 
 @Service
 public class BlockCreatorService {
+
+    private final ParameterService parameterService;
+    private final JChainHasher jChainHasher;
 
     public enum State {
         READY,
@@ -22,30 +26,38 @@ public class BlockCreatorService {
     private final Random random;
     private State state;
 
-    public BlockCreatorService() {
+    @Autowired
+    public BlockCreatorService(final ParameterService parameterService, final JChainHasher jChainHasher) {
+        this.parameterService = parameterService;
+        this.jChainHasher = jChainHasher;
         this.random = new Random();
         this.state = State.READY;
     }
 
-    @Async
-    void createBlock(Block parentBlock, Set<Message> messages, Consumer<Block> consumer) {
+    Maybe<Block> createBlock(Block parentBlock, Set<Message> messages) {
         state = State.RUNNING;
-        String hash;
-        String parentHash = parentBlock.getHash();
-        long nonce = random.nextLong();
-        do {
-            hash = JChainHasher.hash(parentHash, messages, Long.toString(++nonce));
-            try {
-                Thread.sleep(6);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        } while (!JChainHasher.isValidHash(hash) && state.equals(State.RUNNING));
 
-        if (state.equals(State.RUNNING)) {
-            consumer.accept(new Block(hash, parentHash, messages, Long.toString(nonce)));
-        }
-        state = State.READY;
+        return Maybe.create(maybeEmitter -> {
+            String hash;
+            String parentHash = parentBlock.getHash();
+            long nonce = random.nextLong();
+            do {
+                hash = jChainHasher.hash(parentHash, messages, Long.toString(++nonce));
+                try {
+                    Thread.sleep(parameterService.getDifficulty());
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            } while (!jChainHasher.isValidHash(hash) && state.equals(State.RUNNING));
+
+            if (state.equals(State.RUNNING)) {
+                maybeEmitter.onSuccess(new Block(hash, parentHash, messages, Long.toString(nonce)));
+            } else {
+                maybeEmitter.onComplete();
+            }
+
+            state = State.READY;
+        });
     }
 
     public State getState() {

@@ -4,7 +4,7 @@
     <title>BlockChain Dashboard - JChain</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="/jchain.js"></script>
+    <script src="/jchain.js?1"></script>
 </head>
 <body>
 <div>
@@ -17,6 +17,7 @@
 
 <div class="report" th:each="str:${hosts}" th:attr="data-host=${str}">
     <p th:text="${str}"/>
+    <p>Difficulty: <span class="difficulty"></span></p>
     <p>BlockChain:</p>
     <div class="blockChain"></div>
     <p>Orphaned Blocks:</p>

@@ -37,6 +37,33 @@ public class WebController {
         return "index";
     }
 
+    @GetMapping(path = "/increase")
+    public String increase(final Model model) {
+        model.addAttribute("message", new Message(0));
+        addNodesToModel(model);
+        Application application = eurekaClient.getApplication("jchain-node");
+        List<InstanceInfo> instanceInfo = application.getInstances();
+        for(InstanceInfo info : instanceInfo) {
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.getForObject("http://localhost:" + info.getPort() + "/api/difficulty/4", Object.class);
+        }
+        return "index";
+    }
+
+    @GetMapping(path = "/change")
+    public String change(final Model model) {
+        model.addAttribute("message", new Message(0));
+        addNodesToModel(model);
+        Application application = eurekaClient.getApplication("jchain-node");
+        List<InstanceInfo> instanceInfo = application.getInstances();
+        for(InstanceInfo info : instanceInfo) {
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.getForObject("http://localhost:" + info.getPort() + "/api/change", Object.class);
+            break;
+        }
+        return "index";
+    }
+
     @PostMapping(path = "/")
     public String message(@ModelAttribute final Message message, final Model model) {
         Application application = eurekaClient.getApplication("jchain-node");
@@ -81,7 +108,6 @@ public class WebController {
             }
             RestTemplate restTemplate = new RestTemplate();
             restTemplate.postForObject("http://localhost:" + host + "/node/message", message, Message.class);
-
         }
     }
 }

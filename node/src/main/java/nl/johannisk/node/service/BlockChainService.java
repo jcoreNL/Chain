@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -30,17 +31,19 @@ public class BlockChainService {
     private final Set<Message> handledMessages;
     private final BlockChain chain;
     private final BlockCreatorService blockCreatorService;
+    private final JChainHasher jChainHasher;
     private final EurekaClient eurekaClient;
     private final Random random;
 
     @Autowired
-    public BlockChainService(final BlockCreatorService blockCreatorService, final EurekaClient eurekaClient) {
+    public BlockChainService(final BlockCreatorService blockCreatorService, final JChainHasher jChainHasher, final EurekaClient eurekaClient) {
         this.blockCreatorService = blockCreatorService;
+        this.jChainHasher = jChainHasher;
         this.eurekaClient = eurekaClient;
         this.unhandledMessages = new HashSet<>();
         this.handledMessages = new HashSet<>();
         this.chain = new BlockChain();
-        this.random = new Random();
+        this.random = new SecureRandom();
     }
 
     public BlockChain getChain() {
@@ -54,17 +57,15 @@ public class BlockChainService {
     public void addMessage(final Message m) {
         if (!handledMessages.contains(m) && !unhandledMessages.contains(m)) {
             unhandledMessages.add(m);
-            if (unhandledMessages.size() >= 5 && blockCreatorService.getState() == BlockCreatorService.State.READY) {
-                final Set<Message> blockContent = pickMessagesForPotentialBlock();
-                blockCreatorService.createBlock(chain.getEndBlock().getData(), blockContent, this::addCreatedBlock);
+            if (isReadyForNewBlock()) {
+                createNewBlock();
             }
-
         }
     }
 
     public void addBlock(final Block block) {
-        final String hash = JChainHasher.hash(block.getParentHash(), block.getContent(), block.getNonce());
-        if (JChainHasher.isValidHash(hash) && block.getHash().equals(hash) && !chain.containsBlock(block)) {
+        final String hash = jChainHasher.hash(block.getParentHash(), block.getContent(), block.getNonce());
+        if (jChainHasher.isValidHash(hash) && block.getHash().equals(hash) && !chain.containsBlock(block)) {
             final String lastBlockHash = chain.getEndBlock().getData().getHash();
             chain.addBlock(block);
             if (!chain.getEndBlock().getData().getHash().equals(lastBlockHash)) {
@@ -72,9 +73,8 @@ public class BlockChainService {
                     blockCreatorService.cancelRun();
                 }
                 resetMessagesAccordingToChain();
-                if (unhandledMessages.size() >= 5 && blockCreatorService.getState() == BlockCreatorService.State.READY) {
-                    final Set<Message> blockContent = pickMessagesForPotentialBlock();
-                    blockCreatorService.createBlock(chain.getEndBlock().getData(), blockContent, this::addCreatedBlock);
+                if (isReadyForNewBlock()) {
+                    createNewBlock();
                 }
             }
         }
@@ -115,8 +115,17 @@ public class BlockChainService {
         return messageForNextBlock;
     }
 
+    private boolean isReadyForNewBlock() {
+        return unhandledMessages.size() >= 5 && blockCreatorService.getState() == BlockCreatorService.State.READY;
+    }
+
+    private void createNewBlock() {
+        final Set<Message> blockContent = pickMessagesForPotentialBlock();
+        blockCreatorService.createBlock(chain.getEndBlock().getData(), blockContent).subscribe(this::addCreatedBlock);
+    }
+
     @Async
-    private void informNodeOfNewBlock(final String host, final Block block) {
+    void informNodeOfNewBlock(final String host, final Block block) {
         final int delay = random.nextInt(10000) + 3000;
         try {
             Thread.sleep(delay);

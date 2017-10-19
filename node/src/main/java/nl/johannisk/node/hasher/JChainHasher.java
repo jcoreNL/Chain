@@ -1,6 +1,8 @@
 package nl.johannisk.node.hasher;
 
+import nl.johannisk.node.service.ParameterService;
 import nl.johannisk.node.service.model.Message;
+import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -8,11 +10,16 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Set;
 
+@Component
 public class JChainHasher {
-    private JChainHasher() {
+
+    private ParameterService parameterService;
+
+    public JChainHasher(final ParameterService parameterService) {
+        this.parameterService = parameterService;
     }
 
-    public static String hash(final String parentHash, final Set<Message> content, final String nonce) {
+    public String hash(final String parentHash, final Set<Message> content, final String nonce) {
         final MessageDigest messageDigest = getMessageDigest();
         final String blockData = new StringBuilder()
                 .append(parentHash)
@@ -23,9 +30,9 @@ public class JChainHasher {
         return new String(Base64.getEncoder().encode(messageDigest.digest()), StandardCharsets.UTF_8);
     }
 
-    private static MessageDigest getMessageDigest() {
+    private MessageDigest getMessageDigest() {
         try {
-            return MessageDigest.getInstance("SHA-256");
+            return MessageDigest.getInstance(parameterService.getEncryptionAlgorithm());
         } catch (NoSuchAlgorithmException e) {
             /*
              * This exception may never be thrown.
@@ -39,7 +46,7 @@ public class JChainHasher {
         }
     }
 
-    public static boolean isValidHash(final String hash) {
+    public boolean isValidHash(final String hash) {
         if (null == hash) {
             return false;
         }
