@@ -45,7 +45,7 @@ public class WebController {
         List<InstanceInfo> instanceInfo = application.getInstances();
         for(InstanceInfo info : instanceInfo) {
             RestTemplate restTemplate = new RestTemplate();
-            restTemplate.getForObject("http://localhost:" + info.getPort() + "/api/difficulty/4", Object.class);
+            restTemplate.getForObject("http://localhost:" + info.getPort() + "/api/difficulty/1", Object.class);
         }
         return "index";
     }
