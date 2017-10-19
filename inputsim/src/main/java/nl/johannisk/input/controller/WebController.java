@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestTemplate;
 
@@ -37,15 +38,15 @@ public class WebController {
         return "index";
     }
 
-    @GetMapping(path = "/increase")
-    public String increase(final Model model) {
+    @GetMapping(path = "/increase/{number}")
+    public String increase(final Model model, @PathVariable("number") int number) {
         model.addAttribute("message", new Message(0));
         addNodesToModel(model);
         Application application = eurekaClient.getApplication("jchain-node");
         List<InstanceInfo> instanceInfo = application.getInstances();
         for(InstanceInfo info : instanceInfo) {
             RestTemplate restTemplate = new RestTemplate();
-            restTemplate.getForObject("http://localhost:" + info.getPort() + "/api/difficulty/1", Object.class);
+            restTemplate.getForObject("http://localhost:" + info.getPort() + "/api/difficulty/" + number, Object.class);
         }
         return "index";
     }

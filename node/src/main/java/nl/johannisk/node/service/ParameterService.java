@@ -9,7 +9,7 @@ public class ParameterService {
 
     public ParameterService() {
         difficulty = 0;
-        digest = "SHA-1";
+        digest = "SHA-256";
     }
 
     public void setDifficulty(int i) {
@@ -17,7 +17,8 @@ public class ParameterService {
     }
 
     public void increaseEncryption() {
-        this.digest = "SHA-256";
+        this.difficulty = 1;
+        this.digest = "SHA-1";
     }
 
     public int getDifficulty() {
