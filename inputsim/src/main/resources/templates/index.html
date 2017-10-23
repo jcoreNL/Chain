@@ -4,19 +4,18 @@
     <title>BlockChain Dashboard - JChain</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="/jchain.js?1"></script>
+    <script src="/jchain.js?6"></script>
 </head>
 <body>
 <div>
-    <form action="#" th:action="@{/}" th:object="${message}" method="post">
-        <p>Index: <input type="text" th:field="*{index}"/></p>
-        <p> Text: <input type="text" th:field="*{text}"/></p>
-        <p><input type="submit" value="Submit"/> <input type="reset" value="Reset"/></p>
+    <form action="#" th:action="@{/}" method="post">
+        <p><input type="submit" value="Send a Message"/></p>
     </form>
 </div>
 
 <div class="report" th:each="str:${hosts}" th:attr="data-host=${str}">
     <p th:text="${str}"/>
+    <p>Algorithm: <span class="algorithm"></span></p>
     <p>Difficulty: <span class="difficulty"></span></p>
     <p>BlockChain:</p>
     <div class="blockChain"></div>

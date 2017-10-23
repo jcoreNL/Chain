@@ -5,8 +5,10 @@ function reloadReports() {
     $("div.report").each(function () {
         var target = this;
         $.getJSON('http://' + $(this).attr("data-host") + '/api/difficulty', function (data) {
-            console.log(data);
             $(target).find("span.difficulty").html(data);
+        });
+        $.getJSON('http://' + $(this).attr("data-host") + '/api/algorithm', function (data) {
+            $(target).find("span.algorithm").text(data);
         });
         $.getJSON('http://' + $(this).attr("data-host") + '/api/chain', function (data) {
             var chain = $("<div></div>");

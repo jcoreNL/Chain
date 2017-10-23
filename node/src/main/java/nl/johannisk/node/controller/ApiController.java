@@ -52,6 +52,11 @@ public class ApiController {
         return blockChainService.getUnprocessedMessages();
     }
 
+    @RequestMapping(path = "/algorithm")
+    public String getAlgorithm() {
+        return "\"" + parameterService.getEncryptionAlgorithm() + "\"";
+    }
+
     @RequestMapping(path = "/difficulty")
     public int getDifficulty() {
         return parameterService.getDifficulty();

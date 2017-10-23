@@ -6,8 +6,9 @@ public class Message {
 
     public Message() {}
 
-    public Message(int index) {
+    public Message(int index, String text) {
         this.index = index;
+        this.text = text;
     }
 
     public int getIndex() {
