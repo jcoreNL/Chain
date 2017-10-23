@@ -47,6 +47,8 @@ public class WebController {
         offMessages.add("Meetup");
         normalMessages.add("!");
         offMessages.add("!");
+        normalMessages.add("Enjoy!");
+        offMessages.add("Enjoy!");
     }
 
     @GetMapping(path = "/")
@@ -64,9 +66,9 @@ public class WebController {
         for(InstanceInfo info : instanceInfo) {
             Message messageToSend;
             if(counter == randomNumber) {
-                messageToSend = new Message(messageId, offMessages.get(messageId % 5));
+                messageToSend = new Message(messageId, offMessages.get(messageId % 6));
             } else {
-                messageToSend = new Message(messageId, normalMessages.get(messageId % 5));
+                messageToSend = new Message(messageId, normalMessages.get(messageId % 6));
             }
             taskExecutor.execute(new NodeInformerTask(Integer.toString(info.getPort()), messageToSend));
             counter++;
